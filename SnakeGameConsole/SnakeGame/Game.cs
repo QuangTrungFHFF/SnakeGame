@@ -10,6 +10,7 @@ namespace SnakeGame
         public int Height { get; private set; }
         public int Width { get; private set; }
         public string[,] Map { get; private set; }
+        public Snake Snake { get; private set; }
 
         public Game() : this(20,30)
         {
@@ -18,7 +19,9 @@ namespace SnakeGame
         {
             this.Height = h;
             this.Width = w;
-            this.Render();            
+            this.Snake = new Snake(new List<(int, int)>() { (3, 3), (3, 2), (3, 1) }, Direction.Right);
+            this.Render();
+            this.Play();
             
         }
         private void Play()
@@ -26,13 +29,19 @@ namespace SnakeGame
             ConsoleKeyInfo key;
             do
             {
-                key = Console.ReadKey();
+                key = Console.ReadKey(true);
                 while(!isValidKey(key))
                 {
-                    key = Console.ReadKey();
+                    key = Console.ReadKey(true);
                 }
 
-
+                if(key.Key != ConsoleKey.Escape)
+                {
+                    var direction = GetDirectionFromKey(key.Key);
+                    this.Move(direction);
+                    Console.Clear();
+                    this.Render();
+                }
             } while (key.Key != ConsoleKey.Escape);
         }
 
@@ -45,12 +54,91 @@ namespace SnakeGame
             }
             return false;
         }
+        private Direction GetDirectionFromKey(ConsoleKey key)
+        {
+            Direction direction;
+            switch (key)
+            {
+                case ConsoleKey.Enter:
+                    direction = this.Snake.Direction;
+                    break;
+                case ConsoleKey.A:
+                    if(this.Snake.Direction == Direction.Right)
+                    {
+                        direction = this.Snake.Direction;                        
+                    }
+                    else
+                    {
+                        direction = Direction.Left;
+                    }                    
+                    break;
+                case ConsoleKey.D:
+                    if (this.Snake.Direction == Direction.Left)
+                    {
+                        direction = this.Snake.Direction;
+                    }
+                    else
+                    {
+                        direction = Direction.Right;
+                    }                    
+                    break;
+                case ConsoleKey.S:
+                    if (this.Snake.Direction == Direction.Up)
+                    {
+                        direction = this.Snake.Direction;
+                    }
+                    else
+                    {
+                        direction = Direction.Down;
+                    }                    
+                    break;
+                case ConsoleKey.W:
+                    if (this.Snake.Direction == Direction.Down)
+                    {
+                        direction = this.Snake.Direction;
+                    }
+                    else
+                    {
+                        direction = Direction.Up;
+                    }                    
+                    break;
+                default:
+                    direction = this.Snake.Direction;
+                    break;
+            }
+            return direction;            
+        }
+        private void Move(Direction direction)
+        {
+            (int, int) currentPos = this.Snake.Head;
+            
+            switch (direction)
+            {
+                case Direction.Up:                    
+                    (int,int)nextPos = (currentPos.Item1 + 1, currentPos.Item2);
+                    this.Snake.Move(nextPos);
+                    break;
+                case Direction.Down:
+                    nextPos = (currentPos.Item1 - 1, currentPos.Item2);
+                    this.Snake.Move(nextPos);
+                    break;
+                case Direction.Left:
+                    nextPos = (currentPos.Item1, currentPos.Item2-1);
+                    this.Snake.Move(nextPos);
+                    break;
+                case Direction.Right:
+                    nextPos = (currentPos.Item1, currentPos.Item2+1);
+                    this.Snake.Move(nextPos);
+                    break;
+                default:
+                    break;
+            }
+
+        }
         private void Render()
         {
             Console.WriteLine($"Map: {this.Height} x {this.Width}");
-
-            var snake = new Snake(new List<(int, int)>() { (3, 3),(3,2),(3,1)},Direction.Right);
-            this.DrawMap(snake);
+            this.DrawMap(this.Snake);
             this.PrintMap();
         }
         
