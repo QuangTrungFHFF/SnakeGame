@@ -28,26 +28,45 @@ namespace SnakeGame
             this.PrintMap(map);
 
         }
-        private int[,] DrawMap()
+        /// <summary>
+        /// Draw the walls, fill the field with ""
+        /// </summary>
+        /// <returns></returns>
+        private string[,] DrawMap()
         {
-            var map = new int[this.Height, this.Width];
+            var map = new string[this.Height, this.Width];
 
-            for (int i = 0; i < this.Height; i++)
+            //Horizontal walls
+            for(int j =0; j< this.Width;j++)
             {
-                for (int j = 0; j < this.Width; j++)
+                map[0, j] = "*";
+                map[this.Height - 1, j] = "*";
+            }
+
+            //Vertical walls
+            for (int i =1; i< this.Height-1;i++ )
+            {
+                map[i, 0] = "*";
+                map[i, this.Width-1] = "*";
+            }
+
+            //Field
+            for (int i = 1; i < this.Height-1; i++)
+            {
+                for (int j = 1; j < this.Width-1; j++)
                 {
-                    map[i, j] = 0;
+                    map[i, j] = "";
                 }
             }
             return map;
         }
-        public void PrintMap(int[,] map)
+        public void PrintMap(string[,] map)
         {
             for (int i = 0; i < this.Height; i++)
             {
                 for (int j = 0; j < this.Width; j++)
                 {
-                    Console.Write(map[i, j]+ " ");
+                    Console.Write(map[i, j].PadLeft(1)+ " ");
                 }
                 Console.WriteLine();
             }
