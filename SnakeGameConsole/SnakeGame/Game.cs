@@ -5,10 +5,12 @@ namespace SnakeGame
 {
     internal class Game
     {
+        private bool end = false;
         public int Height { get; private set; }
         public int Width { get; private set; }
         public string[,] Map { get; private set; }
         public Snake Snake { get; private set; }
+        
 
         public Game() : this(20, 30)
         {
@@ -18,9 +20,14 @@ namespace SnakeGame
         {
             this.Height = h;
             this.Width = w;
-            this.Snake = new Snake(new List<(int, int)>() { (3, 3), (3, 2), (3, 1) }, Direction.Right);
+            this.Snake = CreateDefaultSnake();
             this.Render();
             this.Play();
+        }
+        private Snake CreateDefaultSnake()
+        {
+            var defaultSnake = new Snake(new List<(int, int)>() { (3, 5), (3, 4), (3, 3), (3, 2), (3, 1) }, Direction.Right);
+            return defaultSnake;
         }
 
         private void Play()
@@ -38,10 +45,35 @@ namespace SnakeGame
                 {
                     var direction = GetDirectionFromKey(key.Key);
                     this.Move(direction);
-                    Console.Clear();
-                    this.Render();
+                    if(!this.end)
+                    {
+                        Console.Clear();
+                        this.Render();
+                    }
+                    else
+                    {
+                        Console.ReadKey();
+                        Console.Clear();
+                        Console.WriteLine("Press escape key to quit! Press any key to start new game!");
+                        key = Console.ReadKey(true);
+                        if (key.Key != ConsoleKey.Escape)
+                        {
+                            NewGame();
+                        }                        
+                    }
                 }
             } while (key.Key != ConsoleKey.Escape);
+        }
+
+        /// <summary>
+        /// Create new game
+        /// </summary>
+        private void NewGame()
+        {
+            Console.Clear();
+            this.Snake = CreateDefaultSnake();
+            this.Render();
+            this.end = false;
         }
 
         /// <summary>
@@ -102,37 +134,37 @@ namespace SnakeGame
             if(!isPossibleToMove(direction))
             {
                 return;
-            }            
+            }
+
+            (int, int) nextPos = currentPos;
 
             switch (direction)
             {
                 case Direction.Up:
-                    (int, int) nextPos = (currentPos.Item1 - 1, currentPos.Item2);
-                    this.Snake.Move(nextPos);
-                    this.Snake.Direction = Direction.Up;
+                    nextPos = (currentPos.Item1 - 1, currentPos.Item2);
                     break;
-
                 case Direction.Down:
-                    nextPos = (currentPos.Item1 + 1, currentPos.Item2);
-                    this.Snake.Move(nextPos);
-                    this.Snake.Direction = Direction.Down;
+                    nextPos = (currentPos.Item1 + 1, currentPos.Item2);                    
                     break;
-
                 case Direction.Left:
-                    nextPos = (currentPos.Item1, currentPos.Item2 - 1);
-                    this.Snake.Move(nextPos);
-                    this.Snake.Direction = Direction.Left;
+                    nextPos = (currentPos.Item1, currentPos.Item2 - 1);                    
                     break;
-
                 case Direction.Right:
-                    nextPos = (currentPos.Item1, currentPos.Item2 + 1);
-                    this.Snake.Move(nextPos);
-                    this.Snake.Direction = Direction.Right;
+                    nextPos = (currentPos.Item1, currentPos.Item2 + 1);                    
                     break;
-
                 default:
                     break;
             }
+
+            if(!this.Snake.Move(nextPos))
+            {
+                Console.WriteLine("Game end!!!");
+                this.end = true;                
+            }
+            else
+            {
+                this.Snake.SetDirection(direction);
+            }            
         }
         /// <summary>
         /// Check if next move is possible

@@ -20,10 +20,15 @@ namespace SnakeGame
             this.Direction = direction;
         }
 
-        public void Move((int,int)position)
+        public bool Move((int,int)position)
         {
+            if(this.SnakeBody.Contains(position))
+            {
+                return false;
+            }            
             this.SnakeBody.Insert(0, position);
             this.SnakeBody.RemoveAt(this.SnakeBody.Count - 1);
+            return true;
         }
     }
     public enum Direction
