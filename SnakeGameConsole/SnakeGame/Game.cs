@@ -27,6 +27,7 @@ namespace SnakeGame
             
             this.PrintMap(map);
 
+
         }
         /// <summary>
         /// Draw the walls, fill the field with ""
