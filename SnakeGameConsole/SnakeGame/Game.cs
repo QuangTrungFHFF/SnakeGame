@@ -200,6 +200,15 @@ namespace SnakeGame
                     break;
             }
 
+            if(isApple(nextPos))
+            {
+                this.Snake.Eat(nextPos);
+                this.Snake.SetDirection(direction);
+                this.Score++;
+                GenerateApple();
+                return;
+            }
+
             if(!this.Snake.Move(nextPos)||isWall(nextPos))
             {
                 Console.WriteLine("Game end!!!");
@@ -251,6 +260,20 @@ namespace SnakeGame
             }
 
             if (position.Item2 == 0 || position.Item2 >= this.Width - 1)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Check if there's an apple at the position
+        /// </summary>
+        /// <param name="position"></param>
+        /// <returns></returns>
+        private bool isApple((int,int) position)
+        {
+            if(this.Apple.X == position.Item1 && this.Apple.Y == position.Item2)
             {
                 return true;
             }

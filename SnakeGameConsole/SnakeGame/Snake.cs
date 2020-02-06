@@ -30,6 +30,11 @@ namespace SnakeGame
             this.SnakeBody.RemoveAt(this.SnakeBody.Count - 1);
             return true;
         }
+
+        public void Eat((int,int) apple)
+        {
+            this.SnakeBody.Insert(0, apple);
+        }
     }
     public enum Direction
     {
