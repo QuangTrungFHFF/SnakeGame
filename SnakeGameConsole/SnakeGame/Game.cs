@@ -8,6 +8,7 @@ namespace SnakeGame
         private bool end = false;
         public int Height { get; private set; }
         public int Width { get; private set; }
+        public int Score { get; private set; }
         public string[,] Map { get; private set; }
         public Snake Snake { get; private set; }
         public Apple Apple { get; private set; }
@@ -21,16 +22,66 @@ namespace SnakeGame
         {
             this.Height = h;
             this.Width = w;
+            this.NewGame();
+            this.Play();
+        }
+
+        #region default
+        /// <summary>
+        /// Create new game
+        /// </summary>
+        private void NewGame()
+        {
+            Console.Clear();
+            this.Score = 0;
             this.Snake = CreateDefaultSnake();
             this.GenerateApple();
             this.Render();
-            this.Play();
+            this.end = false;
         }
+
+        /// <summary>
+        /// Create a default snake on the map
+        /// </summary>
+        /// <returns></returns>
         private Snake CreateDefaultSnake()
         {
             var defaultSnake = new Snake(new List<(int, int)>() { (3, 5), (3, 4), (3, 3), (3, 2), (3, 1) }, Direction.Right);
             return defaultSnake;
         }
+
+        /// <summary>
+        /// Check and generate and apple on the map
+        /// </summary>
+        /// <returns></returns>
+        private bool GenerateApple()
+        {
+            var xMax = this.Height - 2;
+            var yMax = this.Width - 2;
+            var field = xMax * yMax;
+
+            if (this.Snake.SnakeBody.Count >= field)
+            {
+                return false;
+            }
+
+            var rand = new Random();
+            int x;
+            int y;
+            bool isSnake = true;
+            do
+            {
+                x = rand.Next(1, xMax);
+                y = rand.Next(1, yMax);
+
+                isSnake = this.Snake.SnakeBody.Contains((x, y));
+
+            } while (isSnake);
+
+            this.Apple = new Apple(x, y);
+            return true;
+        }
+        #endregion
 
         private void Play()
         {
@@ -48,8 +99,7 @@ namespace SnakeGame
                     var direction = GetDirectionFromKey(key.Key);
                     this.Move(direction);
                     if(!this.end)
-                    {
-                        Console.Clear();
+                    {                        
                         this.Render();
                     }
                     else
@@ -57,6 +107,7 @@ namespace SnakeGame
                         Console.ReadKey();
                         Console.Clear();
                         Console.WriteLine("Press escape key to quit! Press any key to start new game!");
+
                         key = Console.ReadKey(true);
                         if (key.Key != ConsoleKey.Escape)
                         {
@@ -67,17 +118,7 @@ namespace SnakeGame
             } while (key.Key != ConsoleKey.Escape);
         }
 
-        /// <summary>
-        /// Create new game
-        /// </summary>
-        private void NewGame()
-        {
-            Console.Clear();
-            this.Snake = CreateDefaultSnake();
-            this.GenerateApple();
-            this.Render();
-            this.end = false;
-        }
+        
 
         /// <summary>
         /// Check if the input key is allowed
@@ -159,7 +200,7 @@ namespace SnakeGame
                     break;
             }
 
-            if(!this.Snake.Move(nextPos))
+            if(!this.Snake.Move(nextPos)||isWall(nextPos))
             {
                 Console.WriteLine("Game end!!!");
                 this.end = true;                
@@ -198,11 +239,32 @@ namespace SnakeGame
         }
 
         /// <summary>
+        /// check if the position is a wall or not
+        /// </summary>
+        /// <param name="position"></param>
+        /// <returns></returns>
+        private bool isWall((int,int) position)
+        {
+            if(position.Item1 == 0 || position.Item1 >= this.Height-1)
+            {
+                return true;
+            }
+
+            if (position.Item2 == 0 || position.Item2 >= this.Width - 1)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Draw and print the map
         /// </summary>
         private void Render()
         {
+            Console.Clear();
             Console.WriteLine($"Map: {this.Height} x {this.Width}");
+            Console.WriteLine($"Score: {this.Score}");
             this.DrawMap(this.Snake);
             this.PrintMap();
         }
@@ -253,37 +315,7 @@ namespace SnakeGame
             this.Map[snake.Head.Item1, snake.Head.Item2] = "X";
         }
 
-        /// <summary>
-        /// Check and generate and apple on the map
-        /// </summary>
-        /// <returns></returns>
-        private bool GenerateApple()
-        {
-            var xMax = this.Height - 2;
-            var yMax = this.Width - 2;
-            var field = xMax * yMax;
-
-            if (this.Snake.SnakeBody.Count >= field )
-            {
-                return false;
-            }
-
-            var rand = new Random();
-            int x;
-            int y;
-            bool isSnake = true;
-            do
-            {
-                x = rand.Next(1, xMax);
-                y = rand.Next(1, yMax);
-
-                isSnake = this.Snake.SnakeBody.Contains((x, y));
-
-            } while (isSnake);
-
-            this.Apple = new Apple(x, y);
-            return true;
-        }
+        
 
         public void PrintMap()
         {
