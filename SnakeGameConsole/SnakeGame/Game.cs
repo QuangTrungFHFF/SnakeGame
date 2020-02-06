@@ -12,7 +12,6 @@ namespace SnakeGame
         public string[,] Map { get; private set; }
         public Snake Snake { get; private set; }
         public Apple Apple { get; private set; }
-        
 
         public Game() : this(20, 30)
         {
@@ -26,7 +25,52 @@ namespace SnakeGame
             this.Play();
         }
 
+        #region Play
+
+        /// <summary>
+        /// Main function
+        /// </summary>
+        private void Play()
+        {
+            ConsoleKeyInfo key;
+            do
+            {
+                key = Console.ReadKey(true);
+                while (!isValidKey(key))
+                {
+                    key = Console.ReadKey(true);
+                }
+
+                if (key.Key != ConsoleKey.Escape)
+                {
+                    var direction = GetDirectionFromKey(key.Key);
+                    this.Move(direction);
+                    if (!this.end)
+                    {
+                        this.Render();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Game end!!!");
+                        Console.WriteLine($"Your score is: {this.Score}");
+                        Console.ReadKey();
+                        Console.Clear();
+                        Console.WriteLine("Press escape key to quit! Press any key to start new game!");
+
+                        key = Console.ReadKey(true);
+                        if (key.Key != ConsoleKey.Escape)
+                        {
+                            NewGame();
+                        }
+                    }
+                }
+            } while (key.Key != ConsoleKey.Escape);
+        }
+
+        #endregion Play
+
         #region default
+
         /// <summary>
         /// Create new game
         /// </summary>
@@ -75,50 +119,15 @@ namespace SnakeGame
                 y = rand.Next(1, yMax);
 
                 isSnake = this.Snake.SnakeBody.Contains((x, y));
-
             } while (isSnake);
 
             this.Apple = new Apple(x, y);
             return true;
         }
-        #endregion
 
-        private void Play()
-        {
-            ConsoleKeyInfo key;
-            do
-            {
-                key = Console.ReadKey(true);
-                while (!isValidKey(key))
-                {
-                    key = Console.ReadKey(true);
-                }
+        #endregion default
 
-                if (key.Key != ConsoleKey.Escape)
-                {
-                    var direction = GetDirectionFromKey(key.Key);
-                    this.Move(direction);
-                    if(!this.end)
-                    {                        
-                        this.Render();
-                    }
-                    else
-                    {
-                        Console.ReadKey();
-                        Console.Clear();
-                        Console.WriteLine("Press escape key to quit! Press any key to start new game!");
-
-                        key = Console.ReadKey(true);
-                        if (key.Key != ConsoleKey.Escape)
-                        {
-                            NewGame();
-                        }                        
-                    }
-                }
-            } while (key.Key != ConsoleKey.Escape);
-        }
-
-        
+        #region Keyboard Input
 
         /// <summary>
         /// Check if the input key is allowed
@@ -148,24 +157,33 @@ namespace SnakeGame
                 case ConsoleKey.Enter:
                     direction = this.Snake.Direction;
                     break;
+
                 case ConsoleKey.A:
                     direction = Direction.Left;
                     break;
+
                 case ConsoleKey.D:
                     direction = Direction.Right;
                     break;
+
                 case ConsoleKey.S:
                     direction = Direction.Down;
                     break;
+
                 case ConsoleKey.W:
                     direction = Direction.Up;
                     break;
+
                 default:
                     direction = this.Snake.Direction;
                     break;
             }
             return direction;
         }
+
+        #endregion Keyboard Input
+
+        #region Moving
 
         /// <summary>
         /// Move the snake around
@@ -174,8 +192,8 @@ namespace SnakeGame
         private void Move(Direction direction)
         {
             (int, int) currentPos = this.Snake.Head;
-            
-            if(!isPossibleToMove(direction))
+
+            if (!isPossibleToMove(direction))
             {
                 return;
             }
@@ -187,20 +205,24 @@ namespace SnakeGame
                 case Direction.Up:
                     nextPos = (currentPos.Item1 - 1, currentPos.Item2);
                     break;
+
                 case Direction.Down:
-                    nextPos = (currentPos.Item1 + 1, currentPos.Item2);                    
+                    nextPos = (currentPos.Item1 + 1, currentPos.Item2);
                     break;
+
                 case Direction.Left:
-                    nextPos = (currentPos.Item1, currentPos.Item2 - 1);                    
+                    nextPos = (currentPos.Item1, currentPos.Item2 - 1);
                     break;
+
                 case Direction.Right:
-                    nextPos = (currentPos.Item1, currentPos.Item2 + 1);                    
+                    nextPos = (currentPos.Item1, currentPos.Item2 + 1);
                     break;
+
                 default:
                     break;
             }
 
-            if(isApple(nextPos))
+            if (isApple(nextPos))
             {
                 this.Snake.Eat(nextPos);
                 this.Snake.SetDirection(direction);
@@ -209,16 +231,16 @@ namespace SnakeGame
                 return;
             }
 
-            if(!this.Snake.Move(nextPos)||isWall(nextPos))
+            if (!this.Snake.Move(nextPos) || isWall(nextPos))
             {
-                Console.WriteLine("Game end!!!");
-                this.end = true;                
+                this.end = true;
             }
             else
             {
                 this.Snake.SetDirection(direction);
-            }            
+            }
         }
+
         /// <summary>
         /// Check if next move is possible
         /// </summary>
@@ -252,9 +274,9 @@ namespace SnakeGame
         /// </summary>
         /// <param name="position"></param>
         /// <returns></returns>
-        private bool isWall((int,int) position)
+        private bool isWall((int, int) position)
         {
-            if(position.Item1 == 0 || position.Item1 >= this.Height-1)
+            if (position.Item1 == 0 || position.Item1 >= this.Height - 1)
             {
                 return true;
             }
@@ -271,14 +293,18 @@ namespace SnakeGame
         /// </summary>
         /// <param name="position"></param>
         /// <returns></returns>
-        private bool isApple((int,int) position)
+        private bool isApple((int, int) position)
         {
-            if(this.Apple.X == position.Item1 && this.Apple.Y == position.Item2)
+            if (this.Apple.X == position.Item1 && this.Apple.Y == position.Item2)
             {
                 return true;
             }
             return false;
         }
+
+        #endregion Moving
+
+        #region Render Map
 
         /// <summary>
         /// Draw and print the map
@@ -290,10 +316,12 @@ namespace SnakeGame
             Console.WriteLine($"Score: {this.Score}");
             this.DrawMap(this.Snake);
             this.PrintMap();
+            Console.WriteLine("Using W,S,A,D to move the snake around.");
+            Console.WriteLine("Press escape to quit the game.");
         }
 
         /// <summary>
-        /// Draw the walls, fill the field with ""
+        /// Draw the walls, fill the field with "", draw snake and apple
         /// </summary>
         /// <returns></returns>
         private void DrawMap(Snake snake)
@@ -313,7 +341,6 @@ namespace SnakeGame
                 this.Map[i, 0] = "*";
                 this.Map[i, this.Width - 1] = "*";
             }
-
 
             //Field
             for (int i = 1; i < this.Height - 1; i++)
@@ -338,8 +365,9 @@ namespace SnakeGame
             this.Map[snake.Head.Item1, snake.Head.Item2] = "X";
         }
 
-        
-
+        /// <summary>
+        /// Print map to the console
+        /// </summary>
         public void PrintMap()
         {
             for (int i = 0; i < this.Height; i++)
@@ -351,5 +379,7 @@ namespace SnakeGame
                 Console.WriteLine();
             }
         }
+
+        #endregion Render Map
     }
 }
