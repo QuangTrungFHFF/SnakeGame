@@ -10,6 +10,7 @@ namespace SnakeGame
         public int Width { get; private set; }
         public string[,] Map { get; private set; }
         public Snake Snake { get; private set; }
+        public Apple Apple { get; private set; }
         
 
         public Game() : this(20, 30)
@@ -21,6 +22,7 @@ namespace SnakeGame
             this.Height = h;
             this.Width = w;
             this.Snake = CreateDefaultSnake();
+            this.GenerateApple();
             this.Render();
             this.Play();
         }
@@ -72,6 +74,7 @@ namespace SnakeGame
         {
             Console.Clear();
             this.Snake = CreateDefaultSnake();
+            this.GenerateApple();
             this.Render();
             this.end = false;
         }
@@ -226,6 +229,7 @@ namespace SnakeGame
                 this.Map[i, this.Width - 1] = "*";
             }
 
+
             //Field
             for (int i = 1; i < this.Height - 1; i++)
             {
@@ -242,8 +246,43 @@ namespace SnakeGame
                 }
             }
 
+            //Apple
+            this.Map[this.Apple.X, this.Apple.Y] = "A";
+
             //Snake head
             this.Map[snake.Head.Item1, snake.Head.Item2] = "X";
+        }
+
+        /// <summary>
+        /// Check and generate and apple on the map
+        /// </summary>
+        /// <returns></returns>
+        private bool GenerateApple()
+        {
+            var xMax = this.Height - 2;
+            var yMax = this.Width - 2;
+            var field = xMax * yMax;
+
+            if (this.Snake.SnakeBody.Count >= field )
+            {
+                return false;
+            }
+
+            var rand = new Random();
+            int x;
+            int y;
+            bool isSnake = true;
+            do
+            {
+                x = rand.Next(1, xMax);
+                y = rand.Next(1, yMax);
+
+                isSnake = this.Snake.SnakeBody.Contains((x, y));
+
+            } while (isSnake);
+
+            this.Apple = new Apple(x, y);
+            return true;
         }
 
         public void PrintMap()

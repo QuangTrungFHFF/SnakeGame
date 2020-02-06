@@ -13,6 +13,7 @@ namespace SnakeGame
             this.X = x;
             this.Y = y;
         }
+        
         public override string ToString()
         {
             return String.Format($"[{X}:{Y}]");
